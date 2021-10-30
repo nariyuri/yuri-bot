@@ -1,6 +1,8 @@
+# -*- coding:utf-8 -*- 
 """
-* 테스트용 데코레이터 만들어두기
+* Test All Func
 """
-class TestDecorator:
-    def __init__(self):
-        exit()
+
+
+if __name__ == '__main__':
+    None

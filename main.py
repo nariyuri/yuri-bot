@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*- 
 import os
 
-None
 
+if __name__ == '__main__':
+    None
 

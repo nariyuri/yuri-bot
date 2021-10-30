@@ -27,6 +27,10 @@ class Event:
     """
     * get event data.
     *
+    * .eventData
+    * .eventDate
+    * .eventUrl
+    * .sundayMaple
     *
     * TODO: GetSundayMaple 
     * HACK: GetDetailEvent 
@@ -63,6 +67,7 @@ class Event:
                 self.imgUrl = _tag.find("img")["src"]
     """
     * 주기적으로 DB와 비교후? or 금요일 선데이 뜰때 변경점 push
+    * 
     """
     def GetSundayMaple(self): 
         self.eventUrl 
@@ -89,9 +94,18 @@ class GetGuildInfo:
         self.guildInfoUrl = _bs    
     
     def GetGuildUserInfo(self):
-        exit()        
+        None
+        
 
 class GetUserInfo:
-    def __init__(self):
-        None     
+    def __init__(self, userName):
+        self.userName = userName
+        self.GetUserData()
+
+    def GetUserData(self):
+        self.userName
             
+
+if __name__ == '__main__':
+    InspectionInfo = GetInspectionInfo()
+    print(InspectionInfo.startDateTime, InspectionInfo.endDateTime, InspectionInfo.strObstacleContents)
