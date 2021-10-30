@@ -17,6 +17,10 @@ class CallFuncTest:
         return self.original_function(*args, **kwargs)
 """
 
+"""
+* @TryFuncTest
+* 
+"""
 class TryFuncTest:   
     def __init__(self, func):
         self.func = func

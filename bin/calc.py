@@ -6,9 +6,9 @@ class EfficiencyCalc:
         None
     def AtkBoss(self):
         self.atkboss = self.AtkBossCalc()
-        
+    
     class AtkBossCalc:
-        def AtkBoss(self, _atk: list, _boss: list, _def: list):
+        def AtkBoss(_atk: list, _boss: list, _def: list):
             """
             * >brief: 방무 300% 기준
                       데미지 계산식에서 방무 보뎀 공퍼 제외 모든항목 고려 X 
@@ -25,9 +25,11 @@ class EfficiencyCalc:
             * 방무: (방무/100*보스방어력-보스방어력+100)
             """
 class Test:
-    def TestAll(self):
-        self.TestEfficiencyCalc
-    def TestEfficiencyCalc():
-        EfficiencyCalc.AtkBoss([10,10],[100,100],[90,93])
+    @classmethod
+    def TestAll(cls):
+        cls.TestEfficiencyCalc()
+    @classmethod
+    def TestEfficiencyCalc(cls):
+        print(EfficiencyCalc.AtkBossCalc.AtkBoss([10,10],[100,100],[90,93]))
 if __name__=="__main__":
-    
+    Test.TestAll()

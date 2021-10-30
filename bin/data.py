@@ -126,32 +126,36 @@ class GetUserInfo:
 * If I add something, MUST be add here
 * 
 """     
+
 class Test:
     """
     * Test all funcs
     """
-    def TestAll(self):
-        self.TestInspectionInfo()
-        self.TestEvent()
+    @classmethod
+    def TestAll(cls):
+        cls.TestInspectionInfo()
+        cls.TestEvent()
 
+    @classmethod
     @importBasedPackage.decorators.TryFuncTest #Complate
-    def TestInspectionInfo():
-        InspectionInfo = GetInspectionInfo()
-        print("패치정보:", InspectionInfo.startDateTime, InspectionInfo.endDateTime, InspectionInfo.strObstacleContents)
+    def TestInspectionInfo(cls):
+        _InspectionInfo = GetInspectionInfo()
+        print("패치정보:", _InspectionInfo.startDateTime, _InspectionInfo.endDateTime, _InspectionInfo.strObstacleContents)
         """
         * 시작시간, 끝나는시간, 패치정보
         """
 
+    @classmethod
     @importBasedPackage.decorators.TryFuncTest
-    def TestEvent():
-        Event = GetEvent()
-        print(Event.eventData, Event.eventDate, Event.eventUrl) #추가
+    def TestEvent(cls):
+        _Event = GetEvent()
+        print(_Event.eventData, _Event.eventDate, _Event.eventUrl) #추가
+        
     @importBasedPackage.decorators.TryFuncTest
     def TestGuildInfo():
         None
 
 if __name__ == '__main__':
-    test = Test()
-    test.TestAll()
+    Test.TestAll()
 
     
