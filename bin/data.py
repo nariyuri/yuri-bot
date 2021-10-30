@@ -4,9 +4,8 @@ import time
 import json
 from urllib.request import urlopen, Request
 from bs4 import BeautifulSoup
-from urllib import parse
 from zeep import Client
-
+import importBasedPackage
 class GetInspectionInfo:
     """
     * get inspection info.
@@ -14,6 +13,7 @@ class GetInspectionInfo:
     * .startDateTime: Inspection start time <datetime>
     * .endDateTime: Inspection start time <datetime>
     * .strObstacleContents: Inspection information <str>
+    * Complate
     """
     def __init__(self):
         _wsdl = 'http://api.maplestory.nexon.com/soap/maplestory.asmx?wsdl'
@@ -23,7 +23,7 @@ class GetInspectionInfo:
         self.endDateTime = _soapData['endDateTime']
         self.strObstacleContents = _soapData['strObstacleContents']
 
-class Event:
+class GetEvent:
     """
     * get event data.
     *
@@ -31,13 +31,20 @@ class Event:
     * .eventDate
     * .eventUrl
     * .sundayMaple
-    *
-    * TODO: GetSundayMaple 
+    * 
+    * .GetDetailEvent
+    * - .imgUrl
+    * 
     * HACK: GetDetailEvent 
     """
     def __init__(self):
         self._GetEvent()
 
+    """
+    * _GetEvent()
+    * 
+    * 
+    """
     def _GetEvent(self) :
         self.eventData = []
         self.eventDate = []
@@ -56,7 +63,11 @@ class Event:
                         self.sundayMaple = _eventUrl
                 if _dd.find('dd', {'class':'date'}):    
                     self.eventDate.append(_dd.text.strip('\n'))
-
+    """
+    * 코드 재사용을 위해 인자 받는 static 함수로 만들기?
+    * 일단 이벤트 이름 : 이벤트url > 이미지까지 가능하게 바꾸는게 나을듯
+    * why, 몇개는 /news/event가 아니기에
+    """
     def GetDetailEvent(self):
         for _eventUrl in self.eventUrl:
             if _eventUrl.find('/News/Event/') == -1:
@@ -67,10 +78,8 @@ class Event:
                 self.imgUrl = _tag.find("img")["src"]
     """
     * 주기적으로 DB와 비교후? or 금요일 선데이 뜰때 변경점 push
-    * 
+    * 여기서 할게 아님 아마 updatedb.py에서 할 예정
     """
-    def GetSundayMaple(self): 
-        self.eventUrl 
 
 class GetGuildInfo:
     def __init__(self, guildName, guildWorld):
@@ -79,20 +88,28 @@ class GetGuildInfo:
 
     def GetGuildData(self):
         _bs = BeautifulSoup(requests.get("www.maple.gg/guild/"+self.guildWorld+"/"+self.guildName+"/members?sort=level").text, 'html.parser')
+        """
+        * 데코레이터로 바꾸기 위해 시도할 예정
+        * why? user Data불러올때도 동일한 상황 발생
+        """
         if _bs.find('i', {'class':'fa fa-info-circle'}): #갱신이 필요할경우
             done = False
-            while done == True:
-                _json = json.loads(requests.get("www.maple.gg/guild/"+self.guildWorld+"/"+self.guildName+"/sync").text)
-                if 'error' in _json:
+            while done == True: #완료될때까지
+                _json = json.loads(requests.get("www.maple.gg/guild/"+self.guildWorld+"/"+self.guildName+"/sync").text) #sync request후 json Data 받아오기
+                if 'error' in _json: #{"error": True}
                     return "길드를 찾을 수 없습니다."
                 else:
-                    if _json['done'] == True:
+                    if _json['done'] == True: #{"done": True}
                         done == True     
                         _bs = BeautifulSoup(requests.get("www.maple.gg/guild/"+self.guildWorld+"/"+self.guildName+"/members?sort=level").text, 'html.parser')       
-                    else:
+                    else: #{"done":False}시 2초 후 재 요청
                         time.sleep(2)
-        self.guildInfoUrl = _bs    
-    
+        self.guildInfoData = _bs    
+    """
+    * 여기서 받아와야 할 정보
+    * 최근접속일, 레벨, 닉네임 etc
+    * 무릉 층수및 상세정보는 GetUserInro에서 처리할 예정
+    """
     def GetGuildUserInfo(self):
         None
         
@@ -104,8 +121,37 @@ class GetUserInfo:
 
     def GetUserData(self):
         self.userName
-            
+"""
+* For Test Func
+* If I add something, MUST be add here
+* 
+"""     
+class Test:
+    """
+    * Test all funcs
+    """
+    def TestAll(self):
+        self.TestInspectionInfo()
+        self.TestEvent()
+
+    @importBasedPackage.decorators.TryFuncTest #Complate
+    def TestInspectionInfo():
+        InspectionInfo = GetInspectionInfo()
+        print("패치정보:", InspectionInfo.startDateTime, InspectionInfo.endDateTime, InspectionInfo.strObstacleContents)
+        """
+        * 시작시간, 끝나는시간, 패치정보
+        """
+
+    @importBasedPackage.decorators.TryFuncTest
+    def TestEvent():
+        Event = GetEvent()
+        print(Event.eventData, Event.eventDate, Event.eventUrl) #추가
+    @importBasedPackage.decorators.TryFuncTest
+    def TestGuildInfo():
+        None
 
 if __name__ == '__main__':
-    InspectionInfo = GetInspectionInfo()
-    print(InspectionInfo.startDateTime, InspectionInfo.endDateTime, InspectionInfo.strObstacleContents)
+    test = Test()
+    test.TestAll()
+
+    
