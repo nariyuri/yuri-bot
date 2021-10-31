@@ -43,7 +43,8 @@ class GetEvent:
     """
     * _GetEvent()
     * 
-    * 
+    * -brief: 공홈에서 이벤트 정보, 기간, url 크롤링
+    * -
     """
     def _GetEvent(self) :
         self.eventData = []
@@ -67,6 +68,7 @@ class GetEvent:
     * 코드 재사용을 위해 인자 받는 static 함수로 만들기?
     * 일단 이벤트 이름 : 이벤트url > 이미지까지 가능하게 바꾸는게 나을듯
     * why, 몇개는 /news/event가 아니기에
+    * 키 < 
     """
     def GetDetailEvent(self):
         for _eventUrl in self.eventUrl:

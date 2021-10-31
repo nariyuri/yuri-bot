@@ -8,7 +8,9 @@ class EfficiencyCalc:
         self.atkboss = self.AtkBossCalc()
     
     class AtkBossCalc:
-        def AtkBoss(_atk: list, _boss: list, _def: list):
+        def __init__(self, _atk: list, _boss: list, _def: list):
+            self.AtkBoss( )
+        def AtkBoss():
             """
             * >brief: 방무 300% 기준
                       데미지 계산식에서 방무 보뎀 공퍼 제외 모든항목 고려 X 
