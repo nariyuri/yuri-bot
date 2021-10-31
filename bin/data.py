@@ -6,14 +6,15 @@ from urllib.request import urlopen, Request
 from bs4 import BeautifulSoup
 from zeep import Client
 import importBasedPackage
+
 class GetInspectionInfo:
     """
-    * get inspection info.
-    * 
-    * .startDateTime: Inspection start time <datetime>
-    * .endDateTime: Inspection start time <datetime>
-    * .strObstacleContents: Inspection information <str>
-    * Complate
+    * @brief: get inspection info.
+    * @param: None
+    * @instance variable: .startDateTime: Inspection start time <datetime>
+    *                     .endDateTime: Inspection start time <datetime>
+    *                     .strObstacleContents: Inspection information <str>
+    * @date: 2021/10/29
     """
     def __init__(self):
         _wsdl = 'http://api.maplestory.nexon.com/soap/maplestory.asmx?wsdl'
@@ -25,12 +26,13 @@ class GetInspectionInfo:
 
 class GetEvent:
     """
-    * get event data.
-    *
-    * .eventData
-    * .eventDate
-    * .eventUrl
-    * .sundayMaple
+    * @brief: get event data.
+    * @param: None
+    * @instance function: _GetEvent: get event data from maplestory ofiicial site
+    * @instance variable: .eventData
+    *                     .eventDate
+    *                     .eventUrl
+    *                     .sundayMaple
     * 
     * .GetDetailEvent
     * - .imgUrl
@@ -40,13 +42,14 @@ class GetEvent:
     def __init__(self):
         self._GetEvent()
 
-    """
-    * _GetEvent()
-    * 
-    * -brief: 공홈에서 이벤트 정보, 기간, url 크롤링
-    * -
-    """
     def _GetEvent(self) :
+        """
+        * @brief: 공홈에서 이벤트 정보 크롤링
+        * param: None
+        * return: .eventData: 이벤트 정보
+        *         .eventDate: 이벤트 진행기간
+        *         .eventUrl: 
+        """
         self.eventData = []
         self.eventDate = []
         self.eventUrl = []
