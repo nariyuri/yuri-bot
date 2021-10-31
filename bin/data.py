@@ -29,15 +29,18 @@ class GetEvent:
     * @brief: get event data.
     * @param: None
     * @instance function: _GetEvent: get event data from maplestory ofiicial site
-    * @instance variable: .eventData
-    *                     .eventDate
-    *                     .eventUrl
-    *                     .sundayMaple
+    *                     GetDetailEvent: get image data about event                     
+    * @instance variable: _GetEvent
+    *                     >.eventData: name of ongoing events <list>
+    *                     >.eventDate: duration of events <list>
+    *                     >.eventUrl: url of events <list>
+    *                     >.sundayMaple
     * 
-    * .GetDetailEvent
-    * - .imgUrl
-    * 
+    *                     .GetDetailEvent
+    *                     >.imgUrl: url of event images <list>
+    * TODO: list > tuple change
     * HACK: GetDetailEvent 
+    *
     """
     def __init__(self):
         self._GetEvent()
