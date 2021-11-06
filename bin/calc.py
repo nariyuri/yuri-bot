@@ -6,10 +6,12 @@ class EfficiencyCalc:
         None
     def AtkBoss(self):
         self.atkBoss = self.AtkBossCalc()
+    def Meso(self):
+        #다 갈아엎어
     
     class AtkBossCalc:
-        def __init__(self, _atk: list, _boss: list, _def: list):
-            self._atk, self._boss, self._def = _atk, _boss, _def
+        def __init__(self, atk_: list, boss_: list, def_: list):
+            self.atk_, self.boss_, self.def_ = atk_, boss_, def_
             self.AtkBoss()
         def AtkBoss(self):
             """
@@ -22,7 +24,7 @@ class EfficiencyCalc:
             self.damage = (list(map(lambda x, y, z: 100*(((100+x)/100)*\
             ((100+y)/100))*\
             (z/100*300-300+100),\
-             self._atk, self._boss, self._def)))
+             self.atk_, self.boss_, self.def_)))
             """
             * 계산식 {(100+공퍼)/100}*{(100+보뎀)/100}*방무
             * 방무: (방무/100*보스방어력-보스방어력+100)
@@ -33,7 +35,7 @@ class EfficiencyCalc:
     class MesoCalc:
         @staticmethod
         def Meso(_level:int, _per:int, _countMonster:int, _potion:int=1.2):
-            _level*7.5*(100+_per)*_potion*_countMonster
+            return _level*7.5*(100+_per)*_potion*_countMonster
 
 class Test:
     @classmethod
@@ -42,9 +44,10 @@ class Test:
     @classmethod
     @importBasedPackage.decorators.TryFuncTest
     def TestEfficiencyCalc(cls):
-        testatkbosscalc = EfficiencyCalc.AtkBossCalc([10,10],[100,100],[90,93])
-        testatkbosscalc.CompareAtkBoss()
-        print(testatkbosscalc.compare)
+        testatkBossCalc = EfficiencyCalc.AtkBossCalc([10,10],[100,100],[90,93])
+        testatkBossCalc.CompareAtkBoss()
+        print(testatkBossCalc.compare)
+        testMesoCalc = 
         
 if __name__=="__main__":
     Test.TestAll()

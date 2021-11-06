@@ -38,7 +38,7 @@ class GetEvent:
     * 
     *                     .GetDetailEvent
     *                     >.imgUrl: url of event images <list>
-    * TODO: list > json change 
+    * TODO: list > tuple change
     * HACK: GetDetailEvent 
     *
     """
@@ -48,38 +48,35 @@ class GetEvent:
     def _GetEvent(self) :
         """
         * @brief: 공홈에서 이벤트 정보 크롤링
-        * @param: None
-        * @variable: .eventData <json> 
-        * {
-        *   "eventName": {
-        *       "url": "eventUrl"
-        *       "date": "eventDate"
-        *       }   
-        * }                               
-        *
-        *            
-        *            
-        *            
-        * 
-        *         
+        * param: None
+        * return: .eventData: 이벤트 정보
+        *         .eventDate: 이벤트 진행기간
+        *         .eventUrl: 
         """
-        _eventData = {}
+        self.eventData = []
+        self.eventDate = []
+        self.eventUrl = []
         _bs = BeautifulSoup(requests.get("https://maplestory.nexon.com/News/Event").text, 'html.parser')
         _tags = _bs.find_all('div',{'class':'event_list_wrap'})
         for _tag in _tags :
-            temp = {}
-            if _tag.find('dd', {'class':'data'}):
-                _eventName = _tag.find('dd', {'class':'data'}).text.strip('\n')
-                _eventUrl = "https://maplestory.nexon.com/"+_tag.find('a')['href']
-                temp['url'] = _eventUrl
-            if _tag.find('dd', {'class':'date'}):
-                temp['date'] = _tag.find('dd', {'class':'date'}).text.strip('\n')
-                _eventData[_eventName] = temp
-            else:
-                _eventData[_eventName] = temp
-        self.eventData = json.dumps(_eventData, ensure_ascii=False, indent=4)
-
-    def GetDetailEvent(self): #이거 만들기 아이거 머리아프네 json 으로
+            _dds = _tag.find_all('dd')
+            for _dd in _dds:
+                if _dd.find('a'):
+                    _eventData = _dd.text.strip('\n')
+                    _eventUrl = "https://maplestory.nexon.com/"+_dd.find('a')['href']
+                    self.eventData.append(_eventData)
+                    self.eventUrl.append(_eventUrl)
+                    if _eventData != -1:
+                        self.sundayMaple = _eventUrl
+                if _dd.find('dd', {'class':'date'}):    
+                    self.eventDate.append(_dd.text.strip('\n'))
+    """
+    * 코드 재사용을 위해 인자 받는 static 함수로 만들기?
+    * 일단 이벤트 이름 : 이벤트url > 이미지까지 가능하게 바꾸는게 나을듯
+    * why, 몇개는 /news/event가 아니기에
+    * 키 < 
+    """
+    def GetDetailEvent(self):
         for _eventUrl in self.eventUrl:
             if _eventUrl.find('/News/Event/') == -1:
                 continue
@@ -126,43 +123,12 @@ class GetGuildInfo:
         
 
 class GetUserInfo:
-    """
-    * @brief: get user's info.
-    * @param: userNames <str or list>
-    * @instance function: _GetEvent: get event data from maplestory ofiicial site
-    *                     GetDetailEvent: get image data about event                     
-    * @instance variable: _GetEvent
-    *                     >.eventData: name of ongoing events <list>
-    *                     >.eventDate: duration of events <list>
-    *                     >.eventUrl: url of events <list>
-    *                     >.sundayMaple
-    * 
-    *                     .GetDetailEvent
-    *                     >.imgUrl: url of event images <list>
-    * TODO: list > json change 
-    * HACK: GetDetailEvent 
-    *
-    """
-    def __init__(self, userNames):
-        self.userNames = userNames
+    def __init__(self, userName):
+        self.userName = userName
         self.GetUserData()
 
     def GetUserData(self):
-        for userName in self.userNames:
-            requests.get("www.maple.gg/u"+userName).text
-    
-    @staticmethod
-    def ParseUserMurung(fetchedData):
-        _bs = BeautifulSoup(fetchedData, 'html.parser')
-        _tags = _bs.find('div',{'class':'user-summary-box-content text-center position-relative'})
-        if _tags:
-            for _tag in _tags:
-                floor = (" ".join(_tag.h1.text.split()))
-                userFloor.append(floor)
-        else :
-            userFloor.append('x')
-
-
+        self.userName
 """
 * For Test Func
 * If I add something, MUST be add here
@@ -191,7 +157,7 @@ class Test:
     @importBasedPackage.decorators.TryFuncTest
     def TestEvent(cls):
         _Event = GetEvent()
-        print(_Event.eventData) #추가
+        print(_Event.eventData, _Event.eventDate, _Event.eventUrl) #추가
         
     @importBasedPackage.decorators.TryFuncTest
     def TestGuildInfo():
@@ -199,5 +165,3 @@ class Test:
 
 if __name__ == '__main__':
     Test.TestAll()
-
-    
