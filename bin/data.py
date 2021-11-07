@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*- 
 import requests
 import time
+from datetime import datetime
 import json
 from urllib.request import urlopen, Request
 from bs4 import BeautifulSoup
@@ -11,35 +12,31 @@ class GetInspectionInfo:
     """
     * @brief: get inspection info.
     * @param: None
-    * @instance variable: .startDateTime: Inspection start time <datetime>
-    *                     .endDateTime: Inspection start time <datetime>
-    *                     .strObstacleContents: Inspection information <str>
-    * @date: 2021/10/29
+    * @instance variable: .inspectionInfo <json>
+    * {
+    *   "inspectionContents": inspection info,
+    *   "startDateTime": "inspection start time" <Y-%m-%d %H:%M:%S+09:00>,
+    *   "endDateTime": "inspection end time" <%Y-%m-%d %H:%M:%S+09:00>
+    * }                     
     """
     def __init__(self):
+        _inspectionInfo = {}
         _wsdl = 'http://api.maplestory.nexon.com/soap/maplestory.asmx?wsdl'
         _client = Client(wsdl=_wsdl)
         _soapData = _client.service.GetInspectionInfo()['_value_1']['_value_1'][0]['InspectionInfo']
-        self.startDateTime = _soapData['startDateTime']
-        self.endDateTime = _soapData['endDateTime']
-        self.strObstacleContents = _soapData['strObstacleContents']
+        _inspectionInfo['inspectionContents'] = _soapData['strObstacleContents']
+        _inspectionInfo['startDateTime'] = str(_soapData['startDateTime'])
+        _inspectionInfo['endDateTime'] = str(_soapData['endDateTime'])
+        self.inspectionInfo = json.dumps(_inspectionInfo, ensure_ascii=False, indent=4)
+        print(self.inspectionInfo)
+
+        
 
 class GetEvent:
     """
     * @brief: get event data.
     * @param: None
-    * @instance function: _GetEvent: get event data from maplestory ofiicial site
-    *                     GetDetailEvent: get image data about event                     
-    * @instance variable: _GetEvent
-    *                     >.eventData: name of ongoing events <list>
-    *                     >.eventDate: duration of events <list>
-    *                     >.eventUrl: url of events <list>
-    *                     >.sundayMaple
-    * 
-    *                     .GetDetailEvent
-    *                     >.imgUrl: url of event images <list>
-    * TODO: list > json change 
-    * HACK: GetDetailEvent 
+    * @instance function: _GetEvent: get event data from maplestory ofiicial site and return json
     *
     """
     def __init__(self):
@@ -53,15 +50,12 @@ class GetEvent:
         * {
         *   "eventName": {
         *       "url": "eventUrl"
-        *       "date": "eventDate"
+        *       "imgUrl": "eventImgUrl"
+        *       "startDateTime": "event start Date <%Y-%m-%D>"
+        *       "endDateTime": "event end Date <%Y-%m-%D>"
         *       }   
         * }                               
-        *
-        *            
-        *            
-        *            
-        * 
-        *         
+        *  
         """
         _eventData = {}
         _bs = BeautifulSoup(requests.get("https://maplestory.nexon.com/News/Event").text, 'html.parser')
@@ -72,25 +66,23 @@ class GetEvent:
                 _eventName = _tag.find('dd', {'class':'data'}).text.strip('\n')
                 _eventUrl = "https://maplestory.nexon.com/"+_tag.find('a')['href']
                 temp['url'] = _eventUrl
+                if _eventUrl.find('/News/Event/') == -1:
+                    pass
+                else:
+                    __bs = BeautifulSoup(requests.get(_eventUrl).text, 'html.parser')
+                    __tag = __bs.find('div',{'class':'new_board_con'})
+                    temp['imgUrl'] = __tag.find("img")["src"]
             if _tag.find('dd', {'class':'date'}):
-                temp['date'] = _tag.find('dd', {'class':'date'}).text.strip('\n')
+                temp['startDateTime'], temp['endDateTime'] = GetEvent._StrToDatetime(_tag.find('dd', {'class':'date'}).text.strip('\n'))
                 _eventData[_eventName] = temp
             else:
                 _eventData[_eventName] = temp
         self.eventData = json.dumps(_eventData, ensure_ascii=False, indent=4)
-
-    def GetDetailEvent(self): #이거 만들기 아이거 머리아프네 json 으로
-        for _eventUrl in self.eventUrl:
-            if _eventUrl.find('/News/Event/') == -1:
-                continue
-            else:
-                _bs = BeautifulSoup(requests.get(_eventUrl).text, 'html.parser')
-                _tag = _bs.find('div',{'class':'new_board_con'})
-                self.imgUrl = _tag.find("img")["src"]
-    """
-    * 주기적으로 DB와 비교후? or 금요일 선데이 뜰때 변경점 push
-    * 여기서 할게 아님 아마 updatedb.py에서 할 예정
-    """
+    @staticmethod
+    def _StrToDatetime(string):
+        dates = string.replace(" ", "").split('~')
+        startDateTime, endDateTime = datetime.strptime(dates[0], '%Y.%m.%d').strftime('%Y-%m-%d'), datetime.strptime(dates[1], '%Y.%m.%d').strftime('%Y-%m-%d')
+        return startDateTime, endDateTime
 
 class GetGuildInfo:
     def __init__(self, guildName, guildWorld):
@@ -145,22 +137,23 @@ class GetUserInfo:
     """
     def __init__(self, userNames):
         self.userNames = userNames
+        self.fetchedData = []
         self.GetUserData()
 
     def GetUserData(self):
         for userName in self.userNames:
-            requests.get("www.maple.gg/u"+userName).text
-    
-    @staticmethod
-    def ParseUserMurung(fetchedData):
-        _bs = BeautifulSoup(fetchedData, 'html.parser')
-        _tags = _bs.find('div',{'class':'user-summary-box-content text-center position-relative'})
-        if _tags:
-            for _tag in _tags:
-                floor = (" ".join(_tag.h1.text.split()))
-                userFloor.append(floor)
-        else :
-            userFloor.append('x')
+            self.fetchedData.append(requests.get("www.maple.gg/u"+userName).text)
+        
+    def ParseUserMurung(self):
+        for _fetchedData in self.fetchedData:
+            _bs = BeautifulSoup(_fetchedData, 'html.parser')
+            _tags = _bs.find('div',{'class':'user-summary-box-content text-center position-relative'})
+            if _tags:
+                for _tag in _tags:
+                    floor = (" ".join(_tag.h1.text.split()))
+                    userFloor.append(floor)
+            else :
+                userFloor.append('x')
 
 
 """
