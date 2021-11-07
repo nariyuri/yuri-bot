@@ -19,7 +19,8 @@ class GetInspectionInfo:
     *   "endDateTime": "inspection end time" <%Y-%m-%d %H:%M:%S+09:00>
     * }                     
     """
-    def __init__(self):
+    @staticmethod
+    def GetInspectionInfo():
         _inspectionInfo = {}
         _wsdl = 'http://api.maplestory.nexon.com/soap/maplestory.asmx?wsdl'
         _client = Client(wsdl=_wsdl)
@@ -27,9 +28,7 @@ class GetInspectionInfo:
         _inspectionInfo['inspectionContents'] = _soapData['strObstacleContents']
         _inspectionInfo['startDateTime'] = str(_soapData['startDateTime'])
         _inspectionInfo['endDateTime'] = str(_soapData['endDateTime'])
-        self.inspectionInfo = json.dumps(_inspectionInfo, ensure_ascii=False, indent=4)
-        print(self.inspectionInfo)
-
+        return json.dumps(_inspectionInfo, ensure_ascii=False, indent=4)
         
 
 class GetEvent:
@@ -37,7 +36,6 @@ class GetEvent:
     * @brief: get event data.
     * @param: None
     * @instance function: _GetEvent: get event data from maplestory ofiicial site and return json
-    *
     """
     def __init__(self):
         self._GetEvent()
@@ -55,7 +53,6 @@ class GetEvent:
         *       "endDateTime": "event end Date <%Y-%m-%D>"
         *       }   
         * }                               
-        *  
         """
         _eventData = {}
         _bs = BeautifulSoup(requests.get("https://maplestory.nexon.com/News/Event").text, 'html.parser')
@@ -78,6 +75,7 @@ class GetEvent:
             else:
                 _eventData[_eventName] = temp
         self.eventData = json.dumps(_eventData, ensure_ascii=False, indent=4)
+
     @staticmethod
     def _StrToDatetime(string):
         dates = string.replace(" ", "").split('~')
@@ -85,16 +83,15 @@ class GetEvent:
         return startDateTime, endDateTime
 
 class GetGuildInfo:
+    """
+    * GetUserInfo를 상속받거나 내부에서 참조?
+    """
     def __init__(self, guildName, guildWorld):
         self.guildName = guildName
         self.guildWorld = guildWorld
 
     def GetGuildData(self):
         _bs = BeautifulSoup(requests.get("www.maple.gg/guild/"+self.guildWorld+"/"+self.guildName+"/members?sort=level").text, 'html.parser')
-        """
-        * 데코레이터로 바꾸기 위해 시도할 예정
-        * why? user Data불러올때도 동일한 상황 발생
-        """
         if _bs.find('i', {'class':'fa fa-info-circle'}): #갱신이 필요할경우
             done = False
             while done == True: #완료될때까지
@@ -120,7 +117,7 @@ class GetGuildInfo:
 class GetUserInfo:
     """
     * @brief: get user's info.
-    * @param: userNames <str or list>
+    * @param: userNames <str>
     * @instance function: _GetEvent: get event data from maplestory ofiicial site
     *                     GetDetailEvent: get image data about event                     
     * @instance variable: _GetEvent
@@ -133,27 +130,25 @@ class GetUserInfo:
     *                     >.imgUrl: url of event images <list>
     * TODO: list > json change 
     * HACK: GetDetailEvent 
-    *
+    * 하시십 다시 아아아 selkf
     """
-    def __init__(self, userNames):
-        self.userNames = userNames
-        self.fetchedData = []
-        self.GetUserData()
-
-    def GetUserData(self):
-        for userName in self.userNames:
-            self.fetchedData.append(requests.get("www.maple.gg/u"+userName).text)
-        
-    def ParseUserMurung(self):
-        for _fetchedData in self.fetchedData:
-            _bs = BeautifulSoup(_fetchedData, 'html.parser')
-            _tags = _bs.find('div',{'class':'user-summary-box-content text-center position-relative'})
-            if _tags:
-                for _tag in _tags:
-                    floor = (" ".join(_tag.h1.text.split()))
-                    userFloor.append(floor)
+    @classmethod
+    def __init__(cls, userName):
+        cls.userName = userName
+        cls.GetUserData()
+    @classmethod
+    def GetUserData(cls):
+        cls._fetchedData = (requests.get("www.maple.gg/u"+cls.userName).text)
+    @classmethod
+    def ParseUserMurung(cls):
+        _bs = BeautifulSoup(cls._fetchedData, 'html.parser')
+        _tags = _bs.find('div',{'class':'user-summary-box-content text-center position-relative'})
+        if _tags:
+            for _tag in _tags:
+                floor = (" ".join(_tag.h1.text.split()))
+                cls.userFloor = (floor)
             else :
-                userFloor.append('x')
+                cls.userFloor = ('기록없음')
 
 
 """
@@ -174,18 +169,18 @@ class Test:
     @classmethod
     @importBasedPackage.decorators.TryFuncTest #Complate
     def TestInspectionInfo(cls):
-        _InspectionInfo = GetInspectionInfo()
-        print("패치정보:", _InspectionInfo.startDateTime, _InspectionInfo.endDateTime, _InspectionInfo.strObstacleContents)
-        """
-        * 시작시간, 끝나는시간, 패치정보
-        """
+        print(GetInspectionInfo.GetInspectionInfo())
 
     @classmethod
     @importBasedPackage.decorators.TryFuncTest
     def TestEvent(cls):
         _Event = GetEvent()
         print(_Event.eventData) #추가
-        
+    
+    @importBasedPackage.decorators.TryFuncTest
+    def TestUserInfo():
+        GetUserInfo
+
     @importBasedPackage.decorators.TryFuncTest
     def TestGuildInfo():
         None
