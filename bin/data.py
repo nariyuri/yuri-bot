@@ -4,7 +4,6 @@ import requests
 import time
 from datetime import datetime
 import json
-import re
 from urllib.request import urlopen, Request
 from bs4 import BeautifulSoup
 from zeep import Client
@@ -180,6 +179,33 @@ class GetUserInfo:
         _tags = self._fetchedData.find('span',{'class':'font-size-12 text-white'})
         self.userLastUpdate = _tags.text.split()[2]
         return self.userLastUpdate
+
+    def ParseAllData(self):
+        _userData = {}
+        _userDatas = {}
+        _murung = {}
+        _seed = {}
+        _union = {}
+        self.ParseUserLvJobPop()
+        self.ParseUserLastUpdate()
+        self.ParseUserMurungSeed()
+        self.ParseUserUnion()
+        _userDatas['Level'] = self.userLevel
+        _userDatas['Job'] = self.userJob
+        _userDatas['Popularity'] = self.userPopularity
+        _userDatas['LastUpdate'] = self.userLastUpdate+'일'
+        _union['Class'] = self.userUnionClass
+        _union['Level'] = self.userUnionLv
+        _userDatas['Union'] = _union
+        _murung['Floor'] = self.userMurungFloor
+        _murung['FloorTime'] = self.userMurungFloorTime
+        _userDatas['Murung'] = _murung
+        _seed['Floor'] = self.userSeedFloor
+        _seed['FloorTime'] = self.userSeedFloorTime
+        _userDatas['TheSeed'] = _seed
+        _userData[self.userName] = _userDatas
+        self.userDatas = json.dumps(_userData, ensure_ascii=False, indent=4)
+        return self.userDatas
             
 class GetGuildInfo():
     def __init__(self, guildName, guildWorld):
@@ -189,7 +215,6 @@ class GetGuildInfo():
         else:
             self.guildWorld = importBasedPackage.lists.ConvertWorld(guildWorld)
         
-
     def GetGuildData(self):
         _bs = BeautifulSoup(requests.get("www.maple.gg/guild/"+self.guildWorld+"/"+self.guildName+"/members?sort=level").text, 'html.parser')
         if _bs.find('i', {'class':'fa fa-info-circle'}): #갱신이 필요할경우
@@ -242,14 +267,12 @@ class Test:
     @importBasedPackage.decorators.TryFuncTest
     def TestEvent(cls):
         _Event = GetEvent()
-        print(_Event.eventData) #추가
+        print(_Event.eventData)
     
     @importBasedPackage.decorators.TryFuncTest
     def TestUserInfo():
         userData = GetUserInfo('나리유리')
-        print(userData.ParseUserMurungSeed())
-        print(userData.ParseUserUnion())
-        print(userData.ParseUserLastUpdate())
+        print(userData.ParseAllData())
 
     @importBasedPackage.decorators.TryFuncTest
     def TestGuildInfo():
